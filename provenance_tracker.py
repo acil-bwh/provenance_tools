@@ -62,8 +62,8 @@ def write_provenance_data(file_names, write_generator_info=True,
 
     Parameters
     ----------
-    file_name : str
-        The name of the file for which to generate provenance info.
+    file_names : str or list of strings
+        The name(s) of the file for which to generate provenance info.
 
     write_generator_info : boolean, optional
         The common use case is for this function to be invoked within some
@@ -191,9 +191,9 @@ def write_provenance_data(file_names, write_generator_info=True,
                                     str(aux_file_deps[k]))
 
 
-    tree = et.ElementTree()
-    tree._setroot(p_info)
-    tree.write(file_name + '.provenance_info.xml', xml_declaration=True)
+        tree = et.ElementTree()
+        tree._setroot(p_info)
+        tree.write(file_name + '.provenance_info.xml', xml_declaration=True)
 
 if __name__ == '__main__':
     desc = """Generate provenace information for the specified file. Provenance
