@@ -53,7 +53,7 @@ def insert_dependency_file_info(parent_el, file_name):
         tmp_tree = et.parse(p_info_file)
         insert_xml_tree(parent_el, tmp_tree.getroot(), sha1.text)
 
-def write_provenance_data(file_name, write_generator_info=True,
+def write_provenance_data(file_names, write_generator_info=True,
                           generator_args=None, aux_file_deps=None, desc=None,
                           generator_file_name=None):
     """Generate provenace information for a data file. This function will
@@ -106,82 +106,89 @@ def write_provenance_data(file_name, write_generator_info=True,
         used to produce the data file). Specifying this variable is only
         necessary if this function is being invoked from within R.
     """
-    if not os.path.isfile(file_name):
-        raise ValueError('File does not exist')
+    if type(file_names) != list:
+        file_names = [file_names]
 
-    p_info = et.Element('provenance_info')
-    sha1 = et.SubElement(p_info, 'sha1')
-    sha1.text = hashlib.sha1(open(file_name, 'rb').read()).hexdigest()
-
-    fname = et.SubElement(p_info, 'file_name')
-    fname.text = file_name
-
-    system = et.SubElement(p_info, 'system')
-    system.text = platform.uname()[0]
-
-    node = et.SubElement(p_info, 'node')
-    node.text = platform.uname()[1]
-
-    release = et.SubElement(p_info, 'release')
-    release.text = platform.uname()[2]
-
-    version = et.SubElement(p_info, 'version')
-    version.text = platform.uname()[3]
-
-    machine = et.SubElement(p_info, 'machine')
-    machine.text = platform.uname()[4]
-
-    processor = et.SubElement(p_info, 'processor')
-    processor.text = platform.uname()[5]
-
-    run_time_stamp = et.SubElement(p_info, 'run_time_stamp')
-    run_time_stamp.text = datetime.datetime.now().isoformat()
-
-    desc_el = et.SubElement(p_info, 'desc')
-    desc_el.text = desc
-
-    if write_generator_info:
-        repo = git.Repo(search_parent_directories=True)
-        if repo.is_dirty():
-            raise RuntimeError('Repository not up-to-date')
-
-        g_info = et.SubElement(p_info, 'generator_info')
-        generator_file = et.SubElement(g_info, 'generator_file')
-        if generator_file_name is None:
-            frame = inspect.stack()[1]
-            generator_file_name = frame[0].f_code.co_filename
-        generator_file.text = generator_file_name
-
-        commit = et.SubElement(g_info, 'commit')
-        commit.text = repo.head.object.hexsha
-
-        if generator_args is not None:
-            arg_info = et.SubElement(g_info, 'arg_info')
-            if isinstance(generator_args, argparse.Namespace):
-                generator_args_dict = vars(generator_args)
-            elif isinstance(generator_args, dict):
-                generator_args_dict = generator_args
-            else:
-                raise ValueError('generator_args: Unrecognized format')
-
-            arg_flags = generator_args_dict.keys()
-            for a in arg_flags:
-                arg_el = et.SubElement(arg_info, a)
-                if generator_args_dict[a] is not None and \
-                   generator_args_dict[a] != file_name:
-                    if os.path.isfile(str(generator_args_dict[a])):
-                        insert_dependency_file_info(arg_el,
-                            str(generator_args_dict[a]))
-                    else:
-                        arg_el.text = str(generator_args_dict[a])
-
-        if aux_file_deps is not None:
-            aux_info = et.SubElement(g_info, 'aux_file_info')
-            for k in aux_file_deps.keys():
-                aux_el = et.SubElement(aux_info, k)
-                if aux_file_deps[k] is not None:
-                    if os.path.isfile(str(aux_file_deps[k])):
-                        insert_dependency_file_info(aux_el, str(aux_file_deps[k]))
+    for file_name in file_names:
+        if not os.path.isfile(file_name):
+            raise ValueError('File does not exist')
+    
+        p_info = et.Element('provenance_info')
+        sha1 = et.SubElement(p_info, 'sha1')
+        sha1.text = hashlib.sha1(open(file_name, 'rb').read()).hexdigest()
+    
+        fname = et.SubElement(p_info, 'file_name')
+        fname.text = file_name
+    
+        system = et.SubElement(p_info, 'system')
+        system.text = platform.uname()[0]
+    
+        node = et.SubElement(p_info, 'node')
+        node.text = platform.uname()[1]
+    
+        release = et.SubElement(p_info, 'release')
+        release.text = platform.uname()[2]
+    
+        version = et.SubElement(p_info, 'version')
+        version.text = platform.uname()[3]
+    
+        machine = et.SubElement(p_info, 'machine')
+        machine.text = platform.uname()[4]
+    
+        processor = et.SubElement(p_info, 'processor')
+        processor.text = platform.uname()[5]
+    
+        run_time_stamp = et.SubElement(p_info, 'run_time_stamp')
+        run_time_stamp.text = datetime.datetime.now().isoformat()
+    
+        desc_el = et.SubElement(p_info, 'desc')
+        desc_el.text = desc
+    
+        if write_generator_info:
+            repo = git.Repo(search_parent_directories=True)
+            if repo.is_dirty():
+                raise RuntimeError('Repository not up-to-date')
+    
+            g_info = et.SubElement(p_info, 'generator_info')
+            generator_file = et.SubElement(g_info, 'generator_file')
+            if generator_file_name is None:
+                frame = inspect.stack()[1]
+                generator_file_name = frame[0].f_code.co_filename
+            generator_file.text = generator_file_name
+    
+            commit = et.SubElement(g_info, 'commit')
+            commit.text = repo.head.object.hexsha
+    
+            if generator_args is not None:
+                arg_info = et.SubElement(g_info, 'arg_info')
+                if isinstance(generator_args, argparse.Namespace):
+                    generator_args_dict = vars(generator_args)
+                elif isinstance(generator_args, dict):
+                    generator_args_dict = generator_args
+                else:
+                    raise ValueError('generator_args: Unrecognized format')
+    
+                arg_flags = generator_args_dict.keys()
+                for a in arg_flags:
+                    arg_el = et.SubElement(arg_info, a)
+                    if generator_args_dict[a] is not None and \
+                       generator_args_dict[a] not in file_names:
+                        if os.path.isfile(str(generator_args_dict[a])):
+                            if str(generator_args_dict[a]) not in file_names:
+                                insert_dependency_file_info(arg_el,
+                                    str(generator_args_dict[a]))
+                        else:
+                            arg_el.text = str(generator_args_dict[a])
+    
+            if aux_file_deps is not None:
+                aux_info = et.SubElement(g_info, 'aux_file_info')
+                for k in aux_file_deps.keys():
+                    aux_el = et.SubElement(aux_info, k)
+                    if aux_file_deps[k] is not None:
+                        if os.path.isfile(str(aux_file_deps[k])):
+                            if str(aux_file_deps[k]) not in file_names:
+                                insert_dependency_file_info(aux_el,
+                                    str(aux_file_deps[k]))
 
 
     tree = et.ElementTree()
