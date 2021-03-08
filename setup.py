@@ -23,6 +23,9 @@ setup(
     author='James Ross',
     author_email='jross@bwh.harvard.edu',
 
+    scripts=[
+        'bin/provenance_initializer'],
+    
     ### Other stuff ...
     classifiers=[
         'Development Status :: 3 - Alpha',
@@ -35,7 +38,7 @@ setup(
     packages = find_packages(),
     entry_points = {
         'console_scripts': [
-            'provenance_tools=provenance_tools.provenance_tracker:main',
+            'provenance_tools=provenance_tools.write_provenance_data:write_provenance_data',
             ],
     },
 )
