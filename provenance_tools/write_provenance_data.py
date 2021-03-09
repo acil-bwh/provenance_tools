@@ -145,9 +145,6 @@ def write_provenance_data(file_names, write_generator_info=True,
         desc_el.text = desc
     
         if write_generator_info:
-            repo = git.Repo(search_parent_directories=True)
-            if repo.is_dirty():
-                raise RuntimeError('Repository not up-to-date')
     
             g_info = et.SubElement(p_info, 'generator_info')
             generator_file = et.SubElement(g_info, 'generator_file')
@@ -155,9 +152,14 @@ def write_provenance_data(file_names, write_generator_info=True,
                 frame = inspect.stack()[1]
                 generator_file_name = frame[0].f_code.co_filename
             generator_file.text = generator_file_name
-    
-            commit = et.SubElement(g_info, 'commit')
-            commit.text = repo.head.object.hexsha
+
+            try:
+                repo = git.Repo(search_parent_directories=True)
+                if repo.is_dirty():
+                    raise RuntimeError('Repository not up-to-date')
+            
+                commit = et.SubElement(g_info, 'commit')
+                commit.text = repo.head.object.hexsha
     
             if generator_args is not None:
                 arg_info = et.SubElement(g_info, 'arg_info')
