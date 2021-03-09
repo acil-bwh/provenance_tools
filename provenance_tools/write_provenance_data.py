@@ -2,6 +2,7 @@ import git, hashlib, inspect, warnings, os, argparse, pdb
 from argparse import ArgumentParser
 import xml.etree.ElementTree as et
 import platform, datetime
+import pkg_resources
 
 def insert_xml_tree(parent_el, child_el, sha1=None):
     """Recurvsive function meant to facilitate the insertion of a file's
@@ -55,7 +56,7 @@ def insert_dependency_file_info(parent_el, file_name):
 
 def write_provenance_data(file_names, write_generator_info=True,
                           generator_args=None, aux_file_deps=None, desc=None,
-                          generator_file_name=None):
+                          generator_file_name=None, module_name=None):
     """Generate provenace information for a data file. This function will
     produce provenance information for 'file_name' and will store that info
     in 'file_name.provenance_info.xml'.
@@ -105,6 +106,12 @@ def write_provenance_data(file_names, write_generator_info=True,
         The name of the generating file (e.g. file name of the script that was
         used to produce the data file). Specifying this variable is only
         necessary if this function is being invoked from within R.
+
+    module_name : str, optional
+        The name of the module that the calling function belongs to. If 
+        specified, the name of the module and its version will be included in
+        the provenance info. Use of this argument is meant to complement use
+        of git to access repository information.
     """
     if type(file_names) != list:
         file_names = [file_names]
@@ -153,6 +160,14 @@ def write_provenance_data(file_names, write_generator_info=True,
                 generator_file_name = frame[0].f_code.co_filename
             generator_file.text = generator_file_name
 
+            if module_name is not None:
+                mod_name = et.SubElement(g_info, 'module_name')
+                mod_name.text = module_name
+
+                mod_version = et.SubElement(g_info, 'module_version')
+                mod_version.text = pkg_resources.\
+                    get_distribution(module_name).version
+                
             try:
                 repo = git.Repo(search_parent_directories=True)
                 if repo.is_dirty():
