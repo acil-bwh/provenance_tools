@@ -160,7 +160,9 @@ def write_provenance_data(file_names, write_generator_info=True,
             
                 commit = et.SubElement(g_info, 'commit')
                 commit.text = repo.head.object.hexsha
-    
+            except git.InvalidGitRepositoryError:
+                pass
+                
             if generator_args is not None:
                 arg_info = et.SubElement(g_info, 'arg_info')
                 if isinstance(generator_args, argparse.Namespace):
