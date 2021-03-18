@@ -161,13 +161,15 @@ def write_provenance_data(file_names, write_generator_info=True,
             generator_file.text = generator_file_name
 
             if module_name is not None:
-                mod_name = et.SubElement(g_info, 'module_name')
-                mod_name.text = module_name
+                try:
+                    mod_name = et.SubElement(g_info, 'module_name')
+                    mod_name.text = module_name
 
-                mod_version = et.SubElement(g_info, 'module_version')
-                mod_version.text = pkg_resources.\
-                    get_distribution(module_name).version
-                
+                    mod_version = et.SubElement(g_info, 'module_version')
+                    mod_version.text = pkg_resources.\
+                        get_distribution(module_name).version
+                except:
+                    pass                    
             try:
                 repo = git.Repo(search_parent_directories=True)
                 if repo.is_dirty():
