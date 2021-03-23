@@ -1,4 +1,11 @@
-import git, hashlib, inspect, warnings, os, argparse, pdb
+import hashlib, inspect, warnings, os, argparse, pdb
+
+try:
+    import git
+    USE_GIT = True
+except:
+    USE_GIT = False
+
 from argparse import ArgumentParser
 import xml.etree.ElementTree as et
 import platform, datetime
@@ -169,16 +176,17 @@ def write_provenance_data(file_names, write_generator_info=True,
                     mod_version.text = pkg_resources.\
                         get_distribution(module_name).version
                 except:
-                    pass                    
-            try:
-                repo = git.Repo(search_parent_directories=True)
-                if repo.is_dirty():
-                    raise RuntimeError('Repository not up-to-date')
+                    pass
+            if USE_GIT:
+                try:
+                    repo = git.Repo(search_parent_directories=True)
+                    if repo.is_dirty():
+                        raise RuntimeError('Repository not up-to-date')
             
-                commit = et.SubElement(g_info, 'commit')
-                commit.text = repo.head.object.hexsha
-            except git.InvalidGitRepositoryError:
-                pass
+                    commit = et.SubElement(g_info, 'commit')
+                    commit.text = repo.head.object.hexsha
+                except git.InvalidGitRepositoryError:
+                    pass
                 
             if generator_args is not None:
                 arg_info = et.SubElement(g_info, 'arg_info')

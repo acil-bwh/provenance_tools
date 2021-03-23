@@ -15,7 +15,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='provenance_tools',
-    version='0.0.3',
+    version='0.0.4',
     description='provenance_tools',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -25,6 +25,10 @@ setup(
 
     scripts=[
         'bin/provenance_initializer'],
+
+    install_requires=[
+        'gitpython'
+    ],
     
     ### Other stuff ...
     classifiers=[
