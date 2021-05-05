@@ -15,16 +15,13 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='provenance_tools',
-    version='0.0.4',
+    version='0.0.5',
     description='provenance_tools',
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/acil-bwh/provenance_tools',
     author='James Ross',
     author_email='jross@bwh.harvard.edu',
-
-    scripts=[
-        'bin/provenance_initializer'],
 
     install_requires=[
         'gitpython'
@@ -42,6 +39,7 @@ setup(
     packages = find_packages(),
     entry_points = {
         'console_scripts': [
+            'provenance_initializer = provenance_tools.provenance_initializer:main',
             'provenance_tools=provenance_tools.write_provenance_data:write_provenance_data',
             ],
     },
